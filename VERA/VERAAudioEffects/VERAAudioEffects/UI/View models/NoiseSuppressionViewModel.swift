@@ -2,6 +2,7 @@
 //  Created by Vonage on 12/3/26.
 //
 
+import Combine
 import Foundation
 import OSLog
 import Observation
@@ -10,6 +11,8 @@ import VERADomain
 @MainActor
 @Observable
 public final class NoiseSuppressionViewModel {
+
+    @ObservationIgnored private var statusCancellable: AnyCancellable?
 
     public var state: NoiseSuppressionState = .disabled
 
@@ -28,11 +31,17 @@ public final class NoiseSuppressionViewModel {
     public init(
         getCurrentPublisher: @escaping GetPublisher,
         disableNoiseSuppressionUseCase: DisableNoiseSuppressionUseCase,
-        enableNoiseSuppressionUseCase: EnableNoiseSuppressionUseCase
+        enableNoiseSuppressionUseCase: EnableNoiseSuppressionUseCase,
+        statusDataSource: NoiseSuppressionStatusDataSource? = nil
     ) {
         self.getCurrentPublisher = getCurrentPublisher
         self.disableNoiseSuppressionUseCase = disableNoiseSuppressionUseCase
         self.enableNoiseSuppressionUseCase = enableNoiseSuppressionUseCase
+        if let statusDataSource {
+            statusCancellable = statusDataSource.noiseSuppressionState
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] state in self?.state = state }
+        }
     }
 
     public func onTap() {

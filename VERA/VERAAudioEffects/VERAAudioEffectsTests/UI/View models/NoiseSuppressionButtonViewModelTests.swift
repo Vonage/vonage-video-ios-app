@@ -14,6 +14,24 @@ import VERATestHelpers
 @MainActor
 struct NoiseSuppressionButtonViewModelTests {
 
+    @Test("Toolbar state follows noise-suppression changes made in Settings")
+    func followsSharedNoiseSuppressionState() async throws {
+        let source = NoiseSuppressionStatusDataSourceSpy()
+        let enable = EnableUseCaseSpy()
+        let disable = DisableUseCaseSpy()
+        let sut = NoiseSuppressionViewModel(
+            getCurrentPublisher: { PublisherSpy() }, disableNoiseSuppressionUseCase: disable,
+            enableNoiseSuppressionUseCase: enable, statusDataSource: source)
+        source.set(state: .enabled)
+        try await Task.sleep(for: .milliseconds(30))
+        #expect(sut.state == .enabled)
+        source.set(state: .disabled)
+        try await Task.sleep(for: .milliseconds(30))
+        #expect(sut.state == .disabled)
+        #expect(enable.callCount == 0)
+        #expect(disable.callCount == 0)
+    }
+
     @Test
     func initialStateIsDisabled() async throws {
         let sut = makeSUT()

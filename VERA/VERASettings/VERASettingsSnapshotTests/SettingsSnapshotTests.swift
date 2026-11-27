@@ -108,6 +108,7 @@ struct SettingsSnapshotTests {
         arguments: [
             ("iPad-general", SettingsSection.general, false),
             ("iPad-video", SettingsSection.video, false),
+            ("iPad-screen-sharing", SettingsSection.screenSharing, false),
             ("iPad-audio", SettingsSection.audio, false),
             ("iPad-stats", SettingsSection.stats, true),
         ])
@@ -157,6 +158,25 @@ struct SettingsSnapshotTests {
         )
     }
 
+    @Test("SettingsView - Independent screen-sharing custom bitrate and codec order")
+    func screenSharingCustomSettings() throws {
+        var preferences = PublisherSettingsPreferences.default
+        preferences.screenShareCodecMode = .manual
+        preferences.screenShareCodecPreference.orderedCodecs = [.h264, .vp9, .vp8]
+        preferences.screenShareFrameRate = .fps7
+        preferences.screenShareResolution = .fullHD
+        preferences.screenShareBitratePreset = .custom
+        preferences.screenShareMaxVideoBitrate = 2_000_000
+        preferences.scalableScreenshareEnabled = true
+        let sut = makeSUT(
+            withStatistics: false, preferences: preferences, selectedSection: .screenSharing,
+            horizontalSizeClass: .regular)
+        assertSnapshot(
+            of: sut, as: .image(precision: 0.99, layout: .device(config: .iPadPro12_9)),
+            named: "iPad-screen-sharing-custom", record: isRecording,
+            testName: "\(snapshotPrefix)_iPad-screen-sharing-custom")
+    }
+
     // MARK: - Captions Section Tests
 
     @Test(
@@ -188,7 +208,7 @@ struct SettingsSnapshotTests {
 
         assertSnapshot(
             of: sut,
-            as: .image(precision: 0.99, layout: .fixed(width: 390, height: 1800)),
+            as: .image(precision: 0.99, layout: .fixed(width: 390, height: 2600)),
             named: "compact-captions",
             record: isRecording,
             testName: "\(snapshotPrefix)_compact-captions"

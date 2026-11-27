@@ -69,72 +69,179 @@ appId: ${APP_ID}
 - waitForAnimationToEnd:
     timeout: 3000
 
-# Assert editable controls are visible in Meeting Room context
-# Video section controls (visible at top)
+# General is the first section; reset remains restricted during a call.
+- assertNotVisible:
+    id: "settings-reset-defaults-button"
+
+- assertVisible:
+    id: "settings-overlay-stats-toggle"
+
+# Follow the shared Video control order, then the native degradation preference.
+- scrollUntilVisible:
+    element:
+      id: "settings-camera-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-camera-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-self-view-mirror-toggle"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-self-view-mirror-toggle"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-video-bitrate-picker"
+    direction: DOWN
+    timeout: 20000
 - assertVisible:
     id: "settings-video-bitrate-picker"
 
-- assertVisible:
-    id: "settings-video-degradation-picker"
-
-# Assert locked controls in Video section
+- scrollUntilVisible:
+    element:
+      id: "settings-codec-mode-locked"
+    direction: DOWN
+    timeout: 20000
 - assertVisible:
     id: "settings-codec-mode-locked"
 
+- scrollUntilVisible:
+    element:
+      id: "settings-frame-rate-locked"
+    direction: DOWN
+    timeout: 20000
 - assertVisible:
     id: "settings-frame-rate-locked"
 
+- scrollUntilVisible:
+    element:
+      id: "settings-resolution-locked"
+    direction: DOWN
+    timeout: 20000
 - assertVisible:
     id: "settings-resolution-locked"
 
-# Screenshot: Video section with some controls locked
+
+- scrollUntilVisible:
+    element:
+      id: "settings-video-degradation-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-video-degradation-picker"
+
 - takeScreenshot: 01-settings-meeting-room-video-section
 
-# Scroll to reveal audio section locked controls. A fixed swipe depends on the form height, so
-# center the middle audio row instead: the other three stay on screen around it.
+# Screen Sharing is a separate section between Video and Audio.
+- scrollUntilVisible:
+    element:
+      id: "settings-screen-share-content-hint-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-screen-share-content-hint-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-screen-share-codec-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-screen-share-codec-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-screen-share-frame-rate-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-screen-share-frame-rate-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-screen-share-resolution-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-screen-share-resolution-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-screen-share-bitrate-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-screen-share-bitrate-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-scalable-screen-share-toggle"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-scalable-screen-share-toggle"
+
+# Audio follows Screen Sharing.
+- scrollUntilVisible:
+    element:
+      id: "settings-audio-bitrate-locked"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-audio-bitrate-locked"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-advanced-noise-suppression-toggle"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-advanced-noise-suppression-toggle"
+
 - scrollUntilVisible:
     element:
       id: "settings-opus-dtx-locked"
     direction: DOWN
-    centerElement: true
-
-- assertVisible:
-    id: "settings-audio-bitrate-locked"
-
+    timeout: 20000
 - assertVisible:
     id: "settings-opus-dtx-locked"
 
+- scrollUntilVisible:
+    element:
+      id: "settings-publisher-fallback-locked"
+    direction: DOWN
+    timeout: 20000
 - assertVisible:
     id: "settings-publisher-fallback-locked"
 
+- scrollUntilVisible:
+    element:
+      id: "settings-subscriber-fallback-locked"
+    direction: DOWN
+    timeout: 20000
 - assertVisible:
     id: "settings-subscriber-fallback-locked"
 
-# Screenshot: Audio section with all controls locked
-- takeScreenshot: 02-settings-meeting-room-audio-section-locked
+- takeScreenshot: 02-settings-meeting-room-audio-section
 
-# Captions Section - stays editable in a call because the language applies immediately
+# Captions follows Audio and stays editable in a call because the language applies immediately.
 - scrollUntilVisible:
     element:
       id: "settings-captions-language-picker"
     direction: DOWN
+    timeout: 20000
 - assertVisible:
     id: "settings-captions-language-picker"
     enabled: true
 
-# Scroll to the General section
+# Statistics is the final section.
 - scrollUntilVisible:
     element:
-      id: "settings-overlay-stats-toggle"
+      text: "Statistics"
     direction: DOWN
-
-# General section - overlay stats toggle is always editable
-- assertVisible:
-    id: "settings-overlay-stats-toggle"
-
-# Assert Reset to Defaults button is NOT visible in Meeting Room context
-- assertNotVisible:
-    id: "settings-reset-defaults-button"
-
-# Screenshot: General section without reset button
-- takeScreenshot: 03-settings-meeting-room-general-section
+    timeout: 20000
+- assertVisible: "Statistics"

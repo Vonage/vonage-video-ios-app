@@ -40,7 +40,7 @@ struct StatisticsSectionScreen: View {
                 ActiveCallWarningText()
             }
         } header: {
-            Text("Stats".localized)
+            Text(SettingsSection.stats.displayName)
                 .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
         }
 
@@ -113,7 +113,7 @@ struct StatisticsSectionContent: View {
             statsToggleContent
         } header: {
             if showsSectionHeader {
-                Text("Stats".localized)
+                Text(SettingsSection.stats.displayName)
             }
         }
     }
