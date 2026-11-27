@@ -6,6 +6,7 @@
 DerivedData/
 build/
 *.xcarchive
+verification-artifacts/
 
 ## User settings
 xcuserdata/
