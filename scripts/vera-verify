@@ -1,0 +1,860 @@
+#!/bin/bash
+#
+# vera-verify: drive VERA iOS in the simulator and capture evidence.
+# Every command prints exactly one JSON object on stdout. Progress goes to stderr.
+# Run `scripts/vera-verify help` for the full command list.
+
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+APP_ID="com.vonage.VERA"
+APP_SCHEME="${APP_SCHEME:-VERA}"
+WORKSPACE="$REPO_ROOT/VERA/VERA.xcworkspace"
+FLOWS_DIR="$REPO_ROOT/.maestro/flows"
+FEATURES_DIR="$REPO_ROOT/.claude/skills/verify/features"
+GENERATED_CONSTANTS="$REPO_ROOT/VERA/VERAApp/VERA/App/Generated/EnvironmentConstants.swift"
+ENTITLEMENTS="$REPO_ROOT/VERA/VERAApp/VERA/VERA.entitlements"
+STATE_ROOT="${VERA_VERIFY_STATE_DIR:-${TMPDIR:-/tmp}/vera-verify}"
+# Not under $TMPDIR: macOS prunes old files there and leaves a half-deleted SDK behind.
+DERIVED_DATA="${VERA_VERIFY_DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/vera-verify}"
+ARTIFACTS_ROOT="${VERA_VERIFY_ARTIFACTS_DIR:-$REPO_ROOT/verification-artifacts}"
+APP_PATH="$DERIVED_DATA/Build/Products/Debug-iphonesimulator/VERA.app"
+MOCK_ONLY_MARKER="# vera-runner: mock-only"
+REACT_REPO="Vonage/vonage-video-react-app"
+BOOT_TIMEOUT="${VERA_VERIFY_BOOT_TIMEOUT:-300}"
+INSTALL_TIMEOUT="${VERA_VERIFY_INSTALL_TIMEOUT:-180}"
+
+COMMAND=""
+DRY_RUN=0
+DEVICE_ARG="${VERA_VERIFY_DEVICE:-}"
+RUN_ID=""
+
+# ---------------------------------------------------------------------------
+# Output helpers
+# ---------------------------------------------------------------------------
+
+log() { echo "vera-verify: $*" >&2; }
+
+# json key=value ... ; a key ending in ":j" takes a raw JSON value.
+json() {
+    python3 - "$@" <<'PY'
+import json, sys
+out = {}
+for item in sys.argv[1:]:
+    key, _, value = item.partition("=")
+    if key.endswith(":j"):
+        out[key[:-2]] = json.loads(value)
+    else:
+        out[key] = value
+print(json.dumps(out, indent=2))
+PY
+}
+
+# json_list item ... -> JSON array of strings
+json_list() {
+    python3 -c 'import json,sys; print(json.dumps(sys.argv[1:]))' "$@"
+}
+
+# with_timeout SECONDS COMMAND... ; returns 124 when the command is killed.
+with_timeout() {
+    local seconds="$1" pid waited=0
+    shift
+    "$@" &
+    pid=$!
+    while kill -0 "$pid" 2>/dev/null; do
+        if [ "$waited" -ge "$seconds" ]; then
+            kill "$pid" 2>/dev/null
+            wait "$pid" 2>/dev/null
+            return 124
+        fi
+        sleep 1
+        waited=$((waited + 1))
+    done
+    wait "$pid"
+}
+
+fail() {
+    local error="$1" next_action="$2"
+    json "ok:j=false" "command=$COMMAND" "error=$error" "next_action=$next_action"
+    exit 1
+}
+
+planned() {
+    json "ok:j=true" "command=$COMMAND" "dry_run:j=true" "would_run:j=$(json_list "$@")"
+    exit 0
+}
+
+# ---------------------------------------------------------------------------
+# Run state: one key=value file per run, outside the repo
+# ---------------------------------------------------------------------------
+
+resolve_run_id() {
+    if [ -n "$RUN_ID" ]; then return; fi
+    if [ -n "${VERA_VERIFY_RUN_ID:-}" ]; then
+        RUN_ID="$VERA_VERIFY_RUN_ID"
+    elif [ -f "$STATE_ROOT/current" ]; then
+        RUN_ID="$(cat "$STATE_ROOT/current")"
+    else
+        RUN_ID="$(date +%Y%m%d-%H%M%S)"
+    fi
+}
+
+start_run() {
+    resolve_run_id
+    mkdir -p "$STATE_ROOT/runs" "$(artifacts_dir)"
+    echo "$RUN_ID" > "$STATE_ROOT/current"
+    touch "$(state_file)"
+}
+
+state_file() { echo "$STATE_ROOT/runs/$RUN_ID.env"; }
+artifacts_dir() { echo "$ARTIFACTS_ROOT/$RUN_ID"; }
+
+state_get() {
+    local file
+    file="$(state_file)"
+    [ -f "$file" ] || return 0
+    grep -E "^$1=" "$file" | tail -n 1 | cut -d= -f2-
+}
+
+state_set() {
+    local file
+    file="$(state_file)"
+    grep -vE "^$1=" "$file" > "$file.tmp" 2>/dev/null || true
+    echo "$1=$2" >> "$file.tmp"
+    mv "$file.tmp" "$file"
+}
+
+# ---------------------------------------------------------------------------
+# Simulator helpers
+# ---------------------------------------------------------------------------
+
+# Prints "udid<TAB>name<TAB>state" for the requested device (name or UDID).
+# Without a request it prefers the run's device, then a booted iPhone 17, then any iPhone 17.
+resolve_device() {
+    local wanted="${1:-}"
+    if [ -z "$wanted" ]; then wanted="$(state_get udid)"; fi
+    xcrun simctl list devices available -j 2>/dev/null | python3 -c '
+import json, sys
+wanted = sys.argv[1]
+devices = [d for runtime in json.load(sys.stdin)["devices"].values() for d in runtime]
+def pick(candidates):
+    booted = [d for d in candidates if d["state"] == "Booted"]
+    return (booted or candidates or [None])[0]
+if wanted:
+    match = pick([d for d in devices if d["udid"] == wanted or d["name"] == wanted])
+else:
+    match = None
+    for name in ("iPhone 17", "iPhone 16 Pro", "iPhone 16"):
+        match = pick([d for d in devices if d["name"] == name])
+        if match:
+            break
+    if match is None:
+        match = pick([d for d in devices if d["name"].startswith("iPhone")])
+if match:
+    print("\t".join([match["udid"], match["name"], match["state"]]))
+' "$wanted"
+}
+
+require_device() {
+    DEVICE_LINE="$(resolve_device "$DEVICE_ARG")"
+    if [ -z "$DEVICE_LINE" ]; then
+        fail "No available iPhone simulator matches '${DEVICE_ARG:-default}'" \
+            "List devices with 'xcrun simctl list devices available' and pass --device '<name or UDID>'"
+    fi
+    UDID="$(echo "$DEVICE_LINE" | cut -f1)"
+    DEVICE_NAME="$(echo "$DEVICE_LINE" | cut -f2)"
+    DEVICE_STATE="$(echo "$DEVICE_LINE" | cut -f3)"
+}
+
+require_booted_app() {
+    require_device
+    if [ "$DEVICE_STATE" != "Booted" ]; then
+        fail "Simulator '$DEVICE_NAME' is not booted" "Run 'scripts/vera-verify launch' first"
+    fi
+    if ! xcrun simctl get_app_container "$UDID" "$APP_ID" >/dev/null 2>&1; then
+        fail "VERA is not installed on '$DEVICE_NAME'" "Run 'scripts/vera-verify launch' first"
+    fi
+}
+
+# The deep link host must match the host the app was built with, so read it from the
+# generated constants instead of asking for it. The value is never printed.
+deep_link_base() {
+    local base="${BASE_API_URL:-}"
+    if [ -z "$base" ] && [ -f "$GENERATED_CONSTANTS" ]; then
+        base="$(sed -nE 's/.*baseAPIURL: String = "([^"]*)".*/\1/p' "$GENERATED_CONSTANTS" | head -n 1)"
+    fi
+    base="${base%/}"
+    echo "${base/#https:\/\//vera://}"
+}
+
+redact_url() {
+    python3 -c '
+import sys, urllib.parse
+parts = urllib.parse.urlsplit(sys.argv[1])
+query = "<redacted>" if parts.query else ""
+fragment = "<redacted>" if parts.fragment else ""
+print(urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, query, fragment)))
+' "$1"
+}
+
+# ---------------------------------------------------------------------------
+# Commands
+# ---------------------------------------------------------------------------
+
+cmd_doctor() {
+    local checks=() required_failed="" next_action=""
+
+    check() {
+        local name="$1" ok="$2" detail="$3" fix="$4" required="${5:-1}"
+        checks+=("$(json "name=$name" "ok:j=$ok" "detail=$detail" "required:j=$([ "$required" = 1 ] && echo true || echo false)")")
+        if [ "$ok" = false ] && [ "$required" = 1 ] && [ -z "$required_failed" ]; then
+            required_failed="$name"
+            next_action="$fix"
+        fi
+    }
+
+    for tool in xcodebuild xcrun maestro java python3; do
+        if command -v "$tool" >/dev/null 2>&1; then
+            check "tool:$tool" true "found" ""
+        else
+            check "tool:$tool" false "not on PATH" "Install $tool (Maestro and Java: scripts/install-maestro.sh)"
+        fi
+    done
+    if command -v gh >/dev/null 2>&1; then
+        check "tool:gh" true "found" "" 0
+    else
+        check "tool:gh" false "only needed for online-url" "brew install gh" 0
+    fi
+
+    if [ -f "$WORKSPACE/contents.xcworkspacedata" ]; then
+        check "workspace" true "VERA/VERA.xcworkspace" ""
+    else
+        check "workspace" false "VERA/VERA.xcworkspace missing" "cd VERA && ./Scripts/builder.sh"
+    fi
+    if [ -f "$GENERATED_CONSTANTS" ]; then
+        check "environment-constants" true "generated" ""
+    else
+        check "environment-constants" false "EnvironmentConstants.swift missing" \
+            "cd VERA && BASE_API_URL=https://api.example.net/ ./Scripts/generateEnvironmentConstants.sh"
+    fi
+
+    local device_line udid="" device_name="" device_state=""
+    device_line="$(resolve_device "$DEVICE_ARG")"
+    if [ -n "$device_line" ]; then
+        udid="$(echo "$device_line" | cut -f1)"
+        device_name="$(echo "$device_line" | cut -f2)"
+        device_state="$(echo "$device_line" | cut -f3)"
+        check "simulator" true "$device_name ($udid) $device_state" ""
+    else
+        check "simulator" false "no available iPhone simulator" "Create one in Xcode > Window > Devices and Simulators"
+    fi
+
+    if [ -d "$APP_PATH" ]; then
+        check "app-built" true "$APP_PATH" ""
+    else
+        check "app-built" false "no build in $DERIVED_DATA" "scripts/vera-verify build" 0
+    fi
+
+    if [ "$device_state" = "Booted" ] && xcrun simctl get_app_container "$udid" "$APP_ID" >/dev/null 2>&1; then
+        check "app-installed" true "installed on $device_name" "" 0
+    else
+        check "app-installed" false "not installed or simulator not booted" "scripts/vera-verify launch" 0
+    fi
+
+    local run=""
+    if [ -f "$STATE_ROOT/current" ]; then run="$(cat "$STATE_ROOT/current")"; fi
+
+    local checks_json="[$(IFS=,; echo "${checks[*]}")]"
+    if [ -n "$required_failed" ]; then
+        json "ok:j=false" "command=doctor" "checks:j=$checks_json" "active_run=$run" \
+            "error=Required check failed: $required_failed" "next_action=$next_action"
+        exit 1
+    fi
+    json "ok:j=true" "command=doctor" "checks:j=$checks_json" "active_run=$run" \
+        "next_action=$([ -d "$APP_PATH" ] && echo 'scripts/vera-verify launch' || echo 'scripts/vera-verify build')"
+}
+
+cmd_build() {
+    local base_url=""
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --base-url) base_url="${2:-}"; shift 2 ;;
+            *) fail "Unknown option for build: $1" "Run 'scripts/vera-verify build --help'" ;;
+        esac
+    done
+    if [ -n "$base_url" ] && [[ "$base_url" != https://* ]]; then
+        fail "--base-url must start with https://" "Pass the deployed backend URL, for example from 'scripts/vera-verify online-url --react-pr <N>'"
+    fi
+    [ -f "$WORKSPACE/contents.xcworkspacedata" ] || fail "Workspace missing" "cd VERA && ./Scripts/builder.sh"
+    require_device
+
+    local build_cmd=(xcodebuild build -workspace "$WORKSPACE" -scheme "$APP_SCHEME"
+        -destination "platform=iOS Simulator,id=$UDID" -derivedDataPath "$DERIVED_DATA"
+        CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO COMPILER_INDEX_STORE_ENABLE=NO RUN_SWIFTLINT=NO -quiet)
+    if [ "$DRY_RUN" = 1 ]; then
+        local steps=()
+        [ -n "$base_url" ] && steps+=("back up EnvironmentConstants.swift and VERA.entitlements" \
+            "BASE_API_URL=<base-url> VERA/Scripts/generateEnvironmentConstants.sh")
+        steps+=("${build_cmd[*]}")
+        [ -n "$base_url" ] && steps+=("restore EnvironmentConstants.swift and VERA.entitlements")
+        planned "${steps[@]}"
+    fi
+
+    start_run
+    local build_log
+    build_log="$(artifacts_dir)/build.log"
+    local backup_dir="$STATE_ROOT/runs/$RUN_ID-generated-backup"
+
+    if [ -n "$base_url" ]; then
+        mkdir -p "$backup_dir"
+        cp -p "$GENERATED_CONSTANTS" "$backup_dir/" 2>/dev/null || true
+        cp -p "$ENTITLEMENTS" "$backup_dir/" 2>/dev/null || true
+        # shellcheck disable=SC2064 # expand paths now, the trap runs after locals go out of scope
+        trap "cp -p '$backup_dir/EnvironmentConstants.swift' '$GENERATED_CONSTANTS' 2>/dev/null; cp -p '$backup_dir/VERA.entitlements' '$ENTITLEMENTS' 2>/dev/null" EXIT
+        log "Generating environment constants for the online base URL"
+        if ! (cd "$REPO_ROOT/VERA" && BASE_API_URL="$base_url" ./Scripts/generateEnvironmentConstants.sh) >"$build_log" 2>&1; then
+            fail "generateEnvironmentConstants.sh failed" "Read $build_log"
+        fi
+    fi
+
+    log "Building $APP_SCHEME for $DEVICE_NAME into $DERIVED_DATA (log: $build_log)"
+    state_set build_failed 1
+    if ! "${build_cmd[@]}" >>"$build_log" 2>&1; then
+        if grep -q 'There is no Info.plist found at .*SourcePackages/artifacts' "$build_log"; then
+            fail "xcodebuild failed: a cached SDK package in $DERIVED_DATA is incomplete" \
+                "Delete $DERIVED_DATA/SourcePackages yourself, then rerun scripts/vera-verify build"
+        fi
+        if grep -q 'Build input files cannot be found' "$build_log"; then
+            fail "xcodebuild failed: the workspace was generated for another branch" \
+                "cd VERA && tuist generate --no-open, then rerun scripts/vera-verify build"
+        fi
+        fail "xcodebuild failed" "Read the last errors with: grep -n 'error:' '$build_log' | tail -20"
+    fi
+    [ -d "$APP_PATH" ] || fail "Build finished but VERA.app is missing" "Check $DERIVED_DATA/Build/Products"
+    state_set build_failed 0
+
+    local mode="mock"
+    if [ -n "$base_url" ]; then mode="online"; fi
+    state_set build_mode "$mode"
+    json "ok:j=true" "command=build" "run_id=$RUN_ID" "device=$DEVICE_NAME" "build_mode=$mode" \
+        "app_path=$APP_PATH" "build_log=$build_log" "next_action=scripts/vera-verify launch$([ "$mode" = online ] && echo ' --online')"
+}
+
+cmd_launch() {
+    local scenario="default" online=0 fail_endpoint="" fail_status="" language="en"
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --scenario) scenario="${2:-}"; shift 2 ;;
+            --language) language="${2:-}"; shift 2 ;;
+            --online) online=1; shift ;;
+            --fail-endpoint) fail_endpoint="${2:-}"; shift 2 ;;
+            --fail-status) fail_status="${2:-}"; shift 2 ;;
+            *) fail "Unknown option for launch: $1" "Run 'scripts/vera-verify launch --help'" ;;
+        esac
+    done
+    [ -d "$APP_PATH" ] || fail "VERA.app has not been built" "Run 'scripts/vera-verify build'"
+    resolve_run_id
+    if [ "$(state_get build_failed)" = 1 ]; then
+        fail "The last build in run $RUN_ID failed, so the installed app would be stale" \
+            "Fix the build and rerun scripts/vera-verify build, or start a new run with --run-id"
+    fi
+    [[ "$language" =~ ^([a-z]{2}(-[A-Za-z]{2})?|system)$ ]] || fail "Invalid --language '$language'" "Use a code such as en, de, es-MX, or 'system' to keep the simulator language"
+    require_device
+
+    local env_args=("SIMCTL_CHILD_VERA_E2E_MOCKS=$([ "$online" = 1 ] && echo 0 || echo 1)")
+    if [ "$online" = 0 ]; then
+        env_args+=("SIMCTL_CHILD_VERA_E2E_SCENARIO=$scenario")
+        [ -n "$fail_endpoint" ] && env_args+=("SIMCTL_CHILD_VERA_E2E_FAIL_ENDPOINT=$fail_endpoint")
+        [ -n "$fail_status" ] && env_args+=("SIMCTL_CHILD_VERA_E2E_FAIL_STATUS=$fail_status")
+    fi
+
+    if [ "$DRY_RUN" = 1 ]; then
+        local steps=()
+        [ "$DEVICE_STATE" != "Booted" ] && steps+=("xcrun simctl boot $UDID" "xcrun simctl bootstatus $UDID -b")
+        steps+=("xcrun simctl install $UDID $APP_PATH"
+            "xcrun simctl privacy $UDID grant camera $APP_ID"
+            "xcrun simctl privacy $UDID grant microphone $APP_ID"
+            "xcrun simctl terminate $UDID $APP_ID")
+        [ "$language" != system ] && steps+=("set AppleLanguages=($language) in VERA's preferences")
+        steps+=("${env_args[*]} xcrun simctl launch $UDID $APP_ID")
+        planned "${steps[@]}"
+    fi
+
+    start_run
+    if [ "$DEVICE_STATE" != "Booted" ]; then
+        log "Booting $DEVICE_NAME"
+        xcrun simctl boot "$UDID" >&2 || fail "Could not boot $DEVICE_NAME" "Run 'scripts/vera-verify doctor'"
+        state_set booted_by_run 1
+        if ! with_timeout "$BOOT_TIMEOUT" xcrun simctl bootstatus "$UDID" -b >/dev/null 2>&1; then
+            fail "Simulator did not finish booting within ${BOOT_TIMEOUT}s" \
+                "Run 'scripts/vera-verify cleanup', then retry; raise VERA_VERIFY_BOOT_TIMEOUT on a loaded machine"
+        fi
+        open -a Simulator --args -CurrentDeviceUDID "$UDID" >/dev/null 2>&1 || true
+    fi
+    state_set udid "$UDID"
+
+    log "Installing VERA on $DEVICE_NAME"
+    if ! with_timeout "$INSTALL_TIMEOUT" xcrun simctl install "$UDID" "$APP_PATH" >&2; then
+        fail "simctl install failed or took longer than ${INSTALL_TIMEOUT}s" \
+            "Run 'scripts/vera-verify doctor'; if the simulator is stuck, run 'scripts/vera-verify cleanup' and retry"
+    fi
+    xcrun simctl privacy "$UDID" grant camera "$APP_ID" >&2 || true
+    xcrun simctl privacy "$UDID" grant microphone "$APP_ID" >&2 || true
+    xcrun simctl terminate "$UDID" "$APP_ID" >/dev/null 2>&1 || true
+
+    # Maestro flows assert English strings, so pin the app language instead of following the simulator.
+    if [ "$language" != system ]; then
+        local prefs
+        prefs="$(xcrun simctl get_app_container "$UDID" "$APP_ID" data)/Library/Preferences/$APP_ID"
+        xcrun simctl spawn "$UDID" defaults write "$prefs" AppleLanguages -array "$language" >&2 ||
+            fail "Could not set the app language" "Retry with --language system"
+        state_set language_prefs "$prefs"
+    fi
+
+    if ! env "${env_args[@]}" xcrun simctl launch "$UDID" "$APP_ID" >&2; then
+        fail "simctl launch failed" "Read logs with 'scripts/vera-verify logs --since 5m'"
+    fi
+    state_set launched_by_run 1
+    if [ "$online" = 1 ] && [ "$(state_get build_mode)" != online ]; then
+        log "warning: --online with a build that was not made with --base-url; the app uses the locally generated base URL"
+    fi
+
+    json "ok:j=true" "command=launch" "run_id=$RUN_ID" "device=$DEVICE_NAME" "udid=$UDID" \
+        "mode=$([ "$online" = 1 ] && echo online || echo mock)" "language=$language" "scenario=$([ "$online" = 1 ] && echo none || echo "$scenario")" \
+        "artifacts_dir=$(artifacts_dir)" "next_action=scripts/vera-verify drive --feature <slug> or scripts/vera-verify screenshot"
+}
+
+# Prints the Maestro flows a feature file declares in its front matter.
+feature_flows() {
+    python3 - "$1" <<'PY'
+import re, sys
+text = open(sys.argv[1], encoding="utf-8").read()
+match = re.match(r"^---\n(.*?)\n---\n", text, re.S)
+if not match:
+    sys.exit(0)
+in_flows = False
+for line in match.group(1).splitlines():
+    if line.startswith("maestro_flows:"):
+        in_flows = True
+        continue
+    if in_flows:
+        item = re.match(r"^\s+-\s+(\S+)", line)
+        if item:
+            print(item.group(1))
+        else:
+            in_flows = False
+PY
+}
+
+cmd_drive() {
+    local flows=() feature="" online=0
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --flow) flows+=("${2:-}"); shift 2 ;;
+            --feature) feature="${2:-}"; shift 2 ;;
+            --online) online=1; shift ;;
+            *) fail "Unknown option for drive: $1" "Run 'scripts/vera-verify drive --help'" ;;
+        esac
+    done
+    if [ -n "$feature" ]; then
+        local feature_file
+        feature_file="$(find "$FEATURES_DIR" -name "$feature.md" | head -n 1)"
+        [ -n "$feature_file" ] || fail "Unknown feature '$feature'" "List features in .claude/skills/verify/features/README.md"
+        while IFS= read -r flow; do flows+=("$flow"); done < <(feature_flows "$feature_file")
+        [ ${#flows[@]} -gt 0 ] || fail "Feature '$feature' declares no Maestro flows" \
+            "Follow the steps in $feature_file by hand with screenshot, deep-link and hierarchy"
+    fi
+    [ ${#flows[@]} -gt 0 ] || fail "Nothing to drive" "Pass --feature <slug> or --flow <file.yaml>"
+
+    local flow
+    for flow in "${flows[@]}"; do
+        [ -f "$FLOWS_DIR/$flow" ] || fail "Flow not found: $flow" "List flows with: ls .maestro/flows"
+    done
+
+    if [ "$DRY_RUN" = 1 ]; then
+        local steps=()
+        for flow in "${flows[@]}"; do
+            steps+=("maestro --device <udid> test --config .maestro/config.yaml --env VERA_E2E_MOCKS=$([ "$online" = 1 ] && echo 0 || echo 1) .maestro/flows/$flow")
+        done
+        planned "${steps[@]}"
+    fi
+
+    require_booted_app
+    start_run
+    local deep_link
+    deep_link="$(deep_link_base)"
+    local results=() failed=0
+    for flow in "${flows[@]}"; do
+        local name="${flow%.yaml}" out
+        out="$(artifacts_dir)/maestro/$name"
+        if [ "$online" = 1 ] && grep -q "^$MOCK_ONLY_MARKER" "$FLOWS_DIR/$flow"; then
+            results+=("$(json "flow=$flow" "result=skipped" "reason=mock-only flow in online mode")")
+            continue
+        fi
+        mkdir -p "$out"
+        log "Running $flow on $DEVICE_NAME"
+        if (cd "$REPO_ROOT" && maestro --device "$UDID" test \
+            --config .maestro/config.yaml \
+            --env APP_ID="$APP_ID" \
+            --env VERA_E2E_MOCKS="$([ "$online" = 1 ] && echo 0 || echo 1)" \
+            --env DEEP_LINK_TEST_URL="$deep_link" \
+            --env ROOM_NAME="vera-verify-$RUN_ID" \
+            --test-output-dir "$out" \
+            --debug-output "$out/debug" \
+            ".maestro/flows/$flow") >"$out/maestro.log" 2>&1; then
+            results+=("$(json "flow=$flow" "result=passed" "evidence=$out")")
+        else
+            failed=1
+            xcrun simctl spawn "$UDID" log show --last 5m --style compact \
+                --predicate "process == \"VERA\"" >"$out/vera.log" 2>/dev/null || true
+            results+=("$(json "flow=$flow" "result=failed" "evidence=$out" "log=$out/maestro.log")")
+        fi
+    done
+
+    local results_json="[$(IFS=,; echo "${results[*]}")]"
+    if [ "$failed" = 1 ]; then
+        json "ok:j=false" "command=drive" "run_id=$RUN_ID" "results:j=$results_json" \
+            "error=One or more flows failed" "next_action=Read maestro.log and the debug screenshots under $(artifacts_dir)/maestro"
+        exit 1
+    fi
+    json "ok:j=true" "command=drive" "run_id=$RUN_ID" "results:j=$results_json" \
+        "next_action=scripts/vera-verify screenshot --name <step> or scripts/vera-verify cleanup"
+}
+
+cmd_screenshot() {
+    local name="screenshot-$(date +%H%M%S)"
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --name) name="${2:-}"; shift 2 ;;
+            *) fail "Unknown option for screenshot: $1" "Run 'scripts/vera-verify screenshot --help'" ;;
+        esac
+    done
+    [[ "$name" =~ ^[A-Za-z0-9._-]+$ ]] || fail "Invalid --name '$name'" "Use letters, digits, dot, dash or underscore"
+    require_booted_app
+    start_run
+    local file
+    file="$(artifacts_dir)/screenshots/$name.png"
+    mkdir -p "$(dirname "$file")"
+    xcrun simctl io "$UDID" screenshot "$file" >&2 || fail "simctl screenshot failed" "Run 'scripts/vera-verify doctor'"
+    json "ok:j=true" "command=screenshot" "run_id=$RUN_ID" "file=$file"
+}
+
+cmd_logs() {
+    local since="10m"
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --since) since="${2:-}"; shift 2 ;;
+            *) fail "Unknown option for logs: $1" "Run 'scripts/vera-verify logs --help'" ;;
+        esac
+    done
+    [[ "$since" =~ ^[0-9]+[smhd]$ ]] || fail "Invalid --since '$since'" "Use a number with a unit, for example 30s, 10m or 1h"
+    require_device
+    [ "$DEVICE_STATE" = "Booted" ] || fail "Simulator '$DEVICE_NAME' is not booted" "Run 'scripts/vera-verify launch' first"
+    start_run
+    local file
+    file="$(artifacts_dir)/logs/vera-$(date +%H%M%S).log"
+    mkdir -p "$(dirname "$file")"
+    xcrun simctl spawn "$UDID" log show --last "$since" --style compact \
+        --predicate "process == \"VERA\"" >"$file" 2>/dev/null || fail "log show failed" "Run 'scripts/vera-verify doctor'"
+    json "ok:j=true" "command=logs" "run_id=$RUN_ID" "file=$file" "lines=$(wc -l <"$file" | tr -d ' ')"
+}
+
+cmd_record_video() {
+    local action="${1:-}"
+    case "$action" in
+        start)
+            require_booted_app
+            if [ "$DRY_RUN" = 1 ]; then planned "xcrun simctl io $UDID recordVideo --codec=h264 --force <artifacts>/videos/<time>.mp4"; fi
+            start_run
+            [ -z "$(state_get video_pid)" ] || fail "A recording is already running" "Run 'scripts/vera-verify record-video stop'"
+            local file
+            file="$(artifacts_dir)/videos/recording-$(date +%H%M%S).mp4"
+            mkdir -p "$(dirname "$file")"
+            xcrun simctl io "$UDID" recordVideo --codec=h264 --force "$file" >/dev/null 2>&1 &
+            state_set video_pid "$!"
+            state_set video_file "$file"
+            json "ok:j=true" "command=record-video" "action=start" "run_id=$RUN_ID" "file=$file" \
+                "next_action=scripts/vera-verify record-video stop"
+            ;;
+        stop)
+            resolve_run_id
+            local pid file
+            pid="$(state_get video_pid)"
+            file="$(state_get video_file)"
+            [ -n "$pid" ] || fail "No recording is running for run $RUN_ID" "Start one with 'scripts/vera-verify record-video start'"
+            if [ "$DRY_RUN" = 1 ]; then planned "kill -INT $pid"; fi
+            kill -INT "$pid" 2>/dev/null || true
+            local waited=0
+            while kill -0 "$pid" 2>/dev/null && [ "$waited" -lt 10 ]; do sleep 1; waited=$((waited + 1)); done
+            state_set video_pid ""
+            [ -s "$file" ] || fail "Recording stopped but the video file is empty" "Record again for longer than a second"
+            json "ok:j=true" "command=record-video" "action=stop" "run_id=$RUN_ID" "file=$file"
+            ;;
+        *) fail "record-video needs 'start' or 'stop'" "Run 'scripts/vera-verify record-video --help'" ;;
+    esac
+}
+
+cmd_deep_link() {
+    local url="${1:-}"
+    [ -n "$url" ] || fail "deep-link needs a URL" "Example: scripts/vera-verify deep-link 'vera://<host>/room/my-room'"
+    [[ "$url" =~ ^(vera|https):// ]] || fail "Only vera:// and https:// links are supported" "Use the vera:// scheme to route straight to the app"
+    local shown
+    shown="$(redact_url "$url")"
+    if [ "$DRY_RUN" = 1 ]; then planned "xcrun simctl openurl <udid> $shown"; fi
+    require_booted_app
+    start_run
+    xcrun simctl openurl "$UDID" "$url" >&2 || fail "simctl openurl failed" "Check that VERA is installed and the URL host matches the app's base URL"
+    json "ok:j=true" "command=deep-link" "run_id=$RUN_ID" "url=$shown" \
+        "next_action=scripts/vera-verify screenshot --name after-deep-link"
+}
+
+cmd_hierarchy() {
+    require_booted_app
+    start_run
+    local file
+    file="$(artifacts_dir)/hierarchy-$(date +%H%M%S).json"
+    maestro --device "$UDID" hierarchy >"$file" 2>/dev/null || fail "maestro hierarchy failed" "Run 'scripts/vera-verify doctor'"
+    local ids
+    ids="$(python3 - "$file" <<'PY'
+import json, re, sys
+text = open(sys.argv[1], encoding="utf-8").read()
+start = text.find("{")
+ids = sorted(set(re.findall(r'"resource-id"\s*:\s*"([^"]+)"', text[start:] if start >= 0 else text)))
+print(json.dumps(ids[:200]))
+PY
+)"
+    json "ok:j=true" "command=hierarchy" "run_id=$RUN_ID" "file=$file" "accessibility_ids:j=$ids"
+}
+
+cmd_online_url() {
+    local pr=""
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --react-pr) pr="${2:-}"; shift 2 ;;
+            *) fail "Unknown option for online-url: $1" "Run 'scripts/vera-verify online-url --help'" ;;
+        esac
+    done
+    [[ "$pr" =~ ^[0-9]+$ ]] || fail "--react-pr needs a PR number" "Example: scripts/vera-verify online-url --react-pr 712"
+    command -v gh >/dev/null 2>&1 || fail "gh is not installed" "brew install gh && gh auth login"
+    local url
+    url="$(gh api "repos/$REACT_REPO/issues/$pr/comments" --paginate --jq '.[].body' 2>/dev/null |
+        sed -nE 's/^\*\*URL:\*\* (https:[^ ]+).*/\1/p' | tail -n 1)"
+    if [ -z "$url" ]; then
+        fail "No VCR deployment found on $REACT_REPO#$pr" \
+            "Ask a maintainer to comment exactly 'vcr:deploy' on the PR (this deploys, so it needs approval), wait for the bot comment, then rerun"
+    fi
+    json "ok:j=true" "command=online-url" "react_pr=$pr" "base_url=$url" \
+        "next_action=scripts/vera-verify build --base-url '$url' && scripts/vera-verify launch --online"
+}
+
+cmd_cleanup() {
+    resolve_run_id
+    local udid pid actions=()
+    udid="$(state_get udid)"
+    pid="$(state_get video_pid)"
+    [ -n "$pid" ] && actions+=("stop recording $pid")
+    [ "$(state_get launched_by_run)" = 1 ] && [ -n "$udid" ] && actions+=("xcrun simctl terminate $udid $APP_ID")
+    [ -n "$(state_get language_prefs)" ] && [ -n "$udid" ] && actions+=("remove the AppleLanguages override from VERA's preferences")
+    [ "$(state_get booted_by_run)" = 1 ] && [ -n "$udid" ] && actions+=("xcrun simctl shutdown $udid")
+    actions+=("remove run state for $RUN_ID")
+    if [ "$DRY_RUN" = 1 ]; then planned "${actions[@]}"; fi
+
+    if [ -n "$pid" ]; then kill -INT "$pid" 2>/dev/null || true; sleep 1; fi
+    if [ "$(state_get launched_by_run)" = 1 ] && [ -n "$udid" ]; then
+        xcrun simctl terminate "$udid" "$APP_ID" >/dev/null 2>&1 || true
+    fi
+    if [ -n "$(state_get language_prefs)" ] && [ -n "$udid" ]; then
+        xcrun simctl spawn "$udid" defaults delete "$(state_get language_prefs)" AppleLanguages >/dev/null 2>&1 || true
+    fi
+    if [ "$(state_get booted_by_run)" = 1 ] && [ -n "$udid" ]; then
+        xcrun simctl shutdown "$udid" >/dev/null 2>&1 || true
+    fi
+    rm -f "$(state_file)"
+    rm -rf "$STATE_ROOT/runs/$RUN_ID-generated-backup"
+    if [ -f "$STATE_ROOT/current" ] && [ "$(cat "$STATE_ROOT/current")" = "$RUN_ID" ]; then
+        rm -f "$STATE_ROOT/current"
+    fi
+    json "ok:j=true" "command=cleanup" "run_id=$RUN_ID" "actions:j=$(json_list "${actions[@]}")" \
+        "artifacts_dir=$(artifacts_dir)" "note=Evidence is kept. Delete it yourself when you no longer need it."
+}
+
+cmd_map_check() {
+    local dir="$FEATURES_DIR"
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --features) dir="${2:-}"; shift 2 ;;
+            *) fail "Unknown option for map-check: $1" "Run 'scripts/vera-verify map-check --help'" ;;
+        esac
+    done
+    [ -f "$dir/README.md" ] || fail "No README.md in $dir" "Pass --features <dir> pointing at the Feature Map"
+    python3 - "$dir" "$FLOWS_DIR" <<'PY'
+import json, os, re, sys
+features_dir, flows_dir = sys.argv[1], sys.argv[2]
+required_h2 = ["Sub-features", "How to get to it (user POV)", "Driving it with Maestro", "Gotchas"]
+statuses = {"developed", "in-progress", "partial", "unknown"}
+verifications = {"maestro", "manual-simulator", "manual-device", "indirect", "source-only"}
+errors = []
+
+files = set()
+for root, _, names in os.walk(features_dir):
+    for name in names:
+        if name.endswith(".md") and not (root == features_dir and name == "README.md"):
+            files.add(os.path.relpath(os.path.join(root, name), features_dir))
+
+readme = open(os.path.join(features_dir, "README.md"), encoding="utf-8").read()
+linked = set(re.findall(r"\]\(([^)#]+\.md)\)", readme))
+for missing in sorted(files - linked):
+    errors.append(f"{missing}: not linked from README.md")
+for dead in sorted(linked - files):
+    errors.append(f"README.md: link to missing file {dead}")
+
+for rel in sorted(files):
+    text = open(os.path.join(features_dir, rel), encoding="utf-8").read()
+    front = re.match(r"^---\n(.*?)\n---\n", text, re.S)
+    if not front:
+        errors.append(f"{rel}: missing front matter")
+        continue
+    meta = front.group(1)
+    status = re.search(r"^status:\s*(\S+)", meta, re.M)
+    verification = re.search(r"^verification:\s*(\S+)", meta, re.M)
+    if not status or status.group(1) not in statuses:
+        errors.append(f"{rel}: status must be one of {sorted(statuses)}")
+    if not verification or verification.group(1) not in verifications:
+        errors.append(f"{rel}: verification must be one of {sorted(verifications)}")
+    if not re.search(r"^parity_rows:", meta, re.M):
+        errors.append(f"{rel}: missing parity_rows")
+    flows = re.findall(r"^\s+-\s+(\S+\.ya?ml)\s*$", meta.split("maestro_flows:", 1)[1], re.M) if "maestro_flows:" in meta else []
+    if verification and verification.group(1) == "maestro" and not flows:
+        errors.append(f"{rel}: verification is maestro but maestro_flows is empty")
+    for flow in flows:
+        if not os.path.isfile(os.path.join(flows_dir, flow)):
+            errors.append(f"{rel}: flow {flow} not found in .maestro/flows")
+    h2 = re.findall(r"^## (.+?)\s*$", text[front.end():], re.M)
+    if h2 != required_h2:
+        errors.append(f"{rel}: H2 sections must be exactly {required_h2}, found {h2}")
+
+result = {"ok": not errors, "command": "map-check", "features": len(files), "errors": errors}
+if errors:
+    result["next_action"] = "Fix the listed files; the shape is described in .claude/skills/verify/SKILL.md"
+print(json.dumps(result, indent=2))
+sys.exit(1 if errors else 0)
+PY
+}
+
+# ---------------------------------------------------------------------------
+# Help and dispatch
+# ---------------------------------------------------------------------------
+
+usage() {
+    case "${1:-}" in
+        doctor) echo "doctor [--device NAME|UDID]
+  Read-only. Checks tools, workspace, generated constants, simulator, build and install.
+  Run it first, and again whenever something looks off." ;;
+        build) echo "build [--device NAME|UDID] [--base-url https://...] [--dry-run]
+  Builds the VERA scheme into an isolated DerivedData (default ~/Library/Developer/Xcode/DerivedData/vera-verify).
+  Never touches the repo's DerivedData/. With --base-url it regenerates EnvironmentConstants.swift
+  and VERA.entitlements for that backend, builds, then restores both files." ;;
+        launch) echo "launch [--device NAME|UDID] [--scenario default|force-mute|recording|captions]
+       [--fail-endpoint NAME --fail-status CODE] [--language en|system] [--online] [--dry-run]
+  Boots the simulator if needed, installs and launches VERA. Mock mode (VERA_E2E_MOCKS=1) is the
+  default and needs no credentials. --online disables mocks; build with --base-url first.
+  The app runs in English by default because the Maestro flows assert English text; cleanup
+  removes that override. Pass --language system to follow the simulator language." ;;
+        drive) echo "drive (--feature SLUG | --flow FILE.yaml ...) [--online] [--dry-run]
+  Runs Maestro flows against the installed app. --feature reads maestro_flows from the feature
+  file in .claude/skills/verify/features/. Evidence goes to <artifacts>/maestro/<flow>/.
+  Mock-only flows are skipped with --online." ;;
+        screenshot) echo "screenshot [--name NAME]
+  Saves a PNG of the booted simulator to <artifacts>/screenshots/NAME.png." ;;
+        logs) echo "logs [--since 10m]
+  Exports VERA process logs from the simulator to <artifacts>/logs/." ;;
+        record-video) echo "record-video start|stop [--dry-run]
+  Records the simulator screen to <artifacts>/videos/. Only one recording per run." ;;
+        deep-link) echo "deep-link URL [--dry-run]
+  Opens a vera:// or https:// link in the simulator. Query and fragment are redacted in the output." ;;
+        hierarchy) echo "hierarchy
+  Dumps the current view hierarchy with Maestro and lists the accessibility ids on screen.
+  Use it to find selectors before writing a flow." ;;
+        online-url) echo "online-url --react-pr NUMBER
+  Read-only. Finds the VCR snapshot URL that the 'vcr:deploy' comment produced on a
+  $REACT_REPO PR. Commenting 'vcr:deploy' deploys, so that step is never automated." ;;
+        cleanup) echo "cleanup [--dry-run]
+  Stops the recording, terminates the app and shuts down the simulator only when this run
+  started them. Removes run state. Never deletes evidence." ;;
+        map-check) echo "map-check [--features DIR]
+  Validates the Feature Map: README index, front matter, the four H2 sections and declared flows." ;;
+        *) echo "Usage: scripts/vera-verify <command> [options]
+
+Drive VERA iOS in the simulator the way a user does and keep the evidence.
+Every command prints one JSON object on stdout; progress goes to stderr.
+
+Commands:
+  doctor        Check that the machine and simulator are ready (read-only)
+  build         Build VERA for the simulator into an isolated DerivedData
+  launch        Boot, install and launch VERA (mocks by default)
+  drive         Run the Maestro flows for a feature or a single flow
+  screenshot    Capture the simulator screen
+  logs          Export VERA logs from the simulator
+  record-video  Start or stop a screen recording
+  deep-link     Open a vera:// or https:// link
+  hierarchy     List the accessibility ids on screen
+  online-url    Find the base URL of a Web VERA PR snapshot (vcr:deploy)
+  cleanup       Tear down what this run started, keep the evidence
+  map-check     Validate the Feature Map
+
+Global options:
+  --device NAME|UDID   Simulator to use (default: run device, then iPhone 17). Env: VERA_VERIFY_DEVICE
+  --run-id ID          Group commands into one run. Env: VERA_VERIFY_RUN_ID
+  --dry-run            Print what would run without changing anything
+  -h, --help           Help for a command: scripts/vera-verify <command> --help
+
+Evidence:  verification-artifacts/<run-id>/ (git-ignored, override with VERA_VERIFY_ARTIFACTS_DIR)
+Run state: \$TMPDIR/vera-verify/ (override with VERA_VERIFY_STATE_DIR)
+
+Typical run:
+  scripts/vera-verify doctor
+  scripts/vera-verify build
+  scripts/vera-verify launch --scenario force-mute
+  scripts/vera-verify drive --feature moderation-force-mute
+  scripts/vera-verify screenshot --name after-force-mute
+  scripts/vera-verify cleanup" ;;
+    esac
+}
+
+main() {
+    COMMAND="${1:-help}"
+    [ $# -gt 0 ] && shift
+
+    local args=()
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --dry-run) DRY_RUN=1; shift ;;
+            --device) DEVICE_ARG="${2:-}"; shift 2 ;;
+            --run-id) RUN_ID="${2:-}"; shift 2 ;;
+            -h|--help) usage "$COMMAND" >&2; json "ok:j=true" "command=$COMMAND" "help=$(usage "$COMMAND")"; exit 0 ;;
+            *) args+=("$1"); shift ;;
+        esac
+    done
+    set -- ${args[@]+"${args[@]}"}
+
+    case "$COMMAND" in
+        help|-h|--help) usage >&2; json "ok:j=true" "command=help" "help=$(usage)" ;;
+        doctor) cmd_doctor "$@" ;;
+        build) cmd_build "$@" ;;
+        launch) cmd_launch "$@" ;;
+        drive) cmd_drive "$@" ;;
+        screenshot) cmd_screenshot "$@" ;;
+        logs) cmd_logs "$@" ;;
+        record-video) cmd_record_video "$@" ;;
+        deep-link) cmd_deep_link "$@" ;;
+        hierarchy) cmd_hierarchy "$@" ;;
+        online-url) cmd_online_url "$@" ;;
+        cleanup) cmd_cleanup "$@" ;;
+        map-check) cmd_map_check "$@" ;;
+        *) fail "Unknown command '$COMMAND'" "Run 'scripts/vera-verify help'" ;;
+    esac
+}
+
+main "$@"

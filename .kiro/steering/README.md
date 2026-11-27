@@ -13,6 +13,7 @@ cannot drift apart.
 | `vera-snapshot-tests.md` | `.claude/skills/record-snapshots/SKILL.md` | `fileMatch` — `**/*SnapshotTests/**` | Snapshot tests — the re-record procedure |
 | `vera-new-module.md` | `.claude/skills/new-module/SKILL.md` | `manual` | `#vera-new-module` |
 | `vera-setup.md` | `.claude/skills/setup/SKILL.md` | `manual` | `#vera-setup` |
+| `vera-verify.md` | `.claude/skills/verify/SKILL.md` | `manual` | `#vera-verify` |
 
 ## How the shared front-matter works
 
