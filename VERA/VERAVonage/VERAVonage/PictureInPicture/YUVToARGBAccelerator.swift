@@ -26,8 +26,12 @@ final class YUVToARGBAccelerator {
             CbCrMin: 0
         )
 
+        // ITU-R BT.601-4 coefficients, stored as a local value instead of reading
+        // Accelerate's legacy externally mutable global matrix pointer.
+        var matrix = vImage_YpCbCrToARGBMatrix(
+            Yp: 1.0, Cr_R: 1.402, Cr_G: -0.7141363, Cb_G: -0.3441363, Cb_B: 1.772)
         return vImageConvert_YpCbCrToARGB_GenerateConversion(
-            kvImage_YpCbCrToARGBMatrix_ITU_R_601_4!,
+            &matrix,
             &pixelRange,
             &infoYpCbCrToARGB,
             kvImage420Yp8_Cb8_Cr8,
