@@ -22,7 +22,8 @@ struct ScreenShareBottomItemPresenter: BottomItemPresentable {
     var image: Image { VERACommonUIAsset.Images.screenShareSolid.swiftUIImage }
     var isActive: Bool { false }
     var accessory: BottomBarButtonAccessory? {
-        .init(placement: .hiddenInteractionLayer) {
+        guard !ScreenShareAvailability.usesSystemContentPicker else { return nil }
+        return .init(placement: .hiddenInteractionLayer) {
             BroadcastPickerRepresentable(
                 preferredExtension: extensionId,
                 actionTrigger: actionTrigger
@@ -31,6 +32,10 @@ struct ScreenShareBottomItemPresenter: BottomItemPresentable {
     }
 
     func performAction() {
-        actionTrigger.send()
+        if ScreenShareAvailability.usesSystemContentPicker {
+            ScreenShareUIBridge.shared.present()
+        } else {
+            actionTrigger.send()
+        }
     }
 }

@@ -280,6 +280,7 @@ private func createDependencies() -> [TargetDependency] {
         .project(target: "VERACocoaLumberjackLogger", path: "VERACocoaLumberjackLogger"),
         // SDK module handles meeting room dependency wiring and all feature modules
         .project(target: "VERAMeetingRoomSDK", path: "VERAMeetingRoomSDK"),
+        .project(target: "VERAScreenShare", path: "VERAScreenShare"),
         .project(target: "VERAE2E", path: "VERAE2E"),
     ]
 
@@ -473,7 +474,9 @@ let project = Project(
                         "VERA needs access to your camera to share your video during video calls and meetings.",
                     "NSMicrophoneUsageDescription":
                         "VERA needs access to your microphone to share your audio during video calls and meetings.",
-                    "UIBackgroundModes": .array(["audio", "voip"]),
+                    "NSScreenCaptureUsageDescription":
+                        "VERA needs access to capture your screen when you share it during a meeting.",
+                    "UIBackgroundModes": .array(["audio", "voip", "screen-capture"]),
                     "CFBundleShortVersionString": "$(MARKETING_VERSION)",
                     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
                     "ITSAppUsesNonExemptEncryption": false,

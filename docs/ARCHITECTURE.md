@@ -172,7 +172,7 @@ iOS-only modules include anything using the Vonage SDK, UIKit, or VonageVideoTra
 
 ## BroadcastExtension (Screen Sharing)
 
-`VERAVonageScreenSharePlugin` includes a `BroadcastExtension` app extension target that uses ReplayKit's Broadcast Upload Extension API. The extension source lives in `VERAApp/BroadcastExtension/`.
+On iOS 27, `VERAVonageScreenSharePlugin` captures with ScreenCaptureKit inside the app and publishes a second Vonage session. On earlier iOS versions the same plugin keeps a `BroadcastExtension` target that uses ReplayKit. The extension source lives in `VERAApp/BroadcastExtension/`. An iOS app running on Mac shares its screen only when the iOS 27 system picker is available.
 
 ## Backend Integration
 

@@ -84,10 +84,11 @@ appId: ${APP_ID}
 - assertVisible:
     id: "settings-captions-language-picker"
 
-# Scroll to reveal General Section
-- swipe:
-    direction: "UP"
-    duration: 500
+# A fixed swipe stops short of the reset button when the form is taller.
+- scrollUntilVisible:
+    element:
+      id: "settings-reset-defaults-button"
+    direction: DOWN
 
 # General Section
 - assertVisible:

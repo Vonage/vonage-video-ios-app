@@ -54,11 +54,14 @@
             ZStack {
                 OngoingActivityControlImageButton(
                     isActive: state.isSharing,
-                    image: VERACommonUIAsset.Images.screenShareSolid.swiftUIImage,
-                    action: {
+                    image: VERACommonUIAsset.Images.screenShareSolid.swiftUIImage
+                ) {
+                    if ScreenShareAvailability.usesSystemContentPicker {
+                        ScreenShareUIBridge.shared.present()
+                    } else {
                         actionTrigger.send()
                     }
-                )
+                }
                 .accessibilityLabel(String(localized: "Share Screen", bundle: .veraScreenShare))
                 .accessibilityHint(
                     state.isSharing
@@ -66,13 +69,15 @@
                         : String(localized: "Start screen sharing", bundle: .veraScreenShare)
                 )
 
-                BroadcastPickerRepresentable(
-                    preferredExtension: preferredExtension,
-                    actionTrigger: actionTrigger
-                )
-                .frame(width: 1, height: 1)
-                .opacity(0.01)
-                .allowsHitTesting(false)
+                if !ScreenShareAvailability.usesSystemContentPicker {
+                    BroadcastPickerRepresentable(
+                        preferredExtension: preferredExtension,
+                        actionTrigger: actionTrigger
+                    )
+                    .frame(width: 1, height: 1)
+                    .opacity(0.01)
+                    .allowsHitTesting(false)
+                }
             }
         }
     }

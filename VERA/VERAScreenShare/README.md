@@ -1,6 +1,6 @@
 # VERAScreenShare
 
-Screen sharing feature for VERA, enabling participants to broadcast their device screen into a Vonage video call using Apple's ReplayKit framework.
+Screen sharing feature for VERA. iOS 27 presents Apple's system content picker and captures with ScreenCaptureKit inside the app. Earlier iOS versions use a ReplayKit Broadcast Upload Extension.
 
 ## Overview
 
@@ -10,7 +10,7 @@ Screen sharing in VERA involves three modules working together:
 |--------|------|
 | **VERAScreenShare** | UI components and credential storage (this module) |
 | **VERAVonageScreenSharePlugin** | Vonage plugin that saves/clears credentials on call lifecycle |
-| **BroadcastExtension** | ReplayKit Broadcast Upload Extension that captures and publishes the screen |
+| **BroadcastExtension** | ReplayKit Broadcast Upload Extension that captures and publishes the screen on iOS 17–26 |
 
 ### Credential flow
 
@@ -18,6 +18,10 @@ Screen sharing in VERA involves three modules working together:
 2. When the user taps the screen share button, iOS launches the Broadcast Upload Extension in a separate process.
 3. `BroadcastSampleHandler.broadcastStarted(withSetupInfo:)` reads credentials from the same App Group via `UserDefaultsScreenShareCredentialsStore` and connects to the Vonage session.
 4. When the call ends, `callDidEnd()` clears credentials and sends a Darwin notification to stop the extension.
+
+### iOS 27
+
+When ScreenCaptureKit is available, the same toolbar button presents `SCContentSharingPicker` instead of the ReplayKit picker. The plugin publishes the picked frames with `OTPublisherKit` on a second Vonage session. Credentials are still saved so a ReplayKit extension can run on older systems. The app's Info.plist includes `NSScreenCaptureUsageDescription` and the `screen-capture` background mode.
 
 ## BroadcastExtension (Broadcast Upload Extension)
 

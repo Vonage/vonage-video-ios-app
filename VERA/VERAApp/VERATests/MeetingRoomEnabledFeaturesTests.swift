@@ -14,7 +14,8 @@ import VERAConfiguration
 /// running setup activates / deactivates the meeting room features as expected.
 ///
 /// - Note: These tests run on the iOS destination, so `pictureInPicture` (gated by
-///   `#if !os(macOS)`) and `screenShare` (gated by `!isiOSAppOnMac`) are expected to be
+///   `#if !os(macOS)`) and `screenShare` (on for this iOS app; an iOS app on Mac keeps it
+///   only when the system content picker is available) are expected to be
 ///   enabled when their flags are `true`. `callKit` is not driven by a flag: it is active
 ///   on a device and inactive on the simulator, see ``callKitFeatures``.
 @MainActor
